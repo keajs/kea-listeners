@@ -38,10 +38,22 @@ export default {
       }
 
       const newListeners = input.listeners(logic)
+      
       logic.listeners = { 
         ...(logic.listeners || {}), 
-        ...newListeners
       } 
+
+      for (const key of Object.keys(newListeners)) {
+        const newArray = Array.isArray(newListeners[key]) ? newListeners[key] : [newListeners[key]]
+        if (logic.listeners[key]) {          
+          logic.listeners[key] = [
+            ...logic.listeners[key],
+            ...newArray
+          ]
+        } else {
+          logic.listeners[key] = newArray
+        }
+      }
     } 
   },
   
@@ -57,13 +69,9 @@ export default {
         const response = next(action) 
         const listeners = byAction[action.type]
         if (listeners) { 
-          for (const listener of Object.values(listeners)) { 
-            if (Array.isArray(listener)) {
-              for (const innerListener of listener) { 
-                innerListener(action, store) 
-              }
-            } else {
-              listener(action, store) 
+          for (const listenerArray of Object.values(listeners)) { 
+            for (const innerListener of listenerArray) { 
+              innerListener(action, store) 
             }
           } 
         }
