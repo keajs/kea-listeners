@@ -37,11 +37,23 @@ export default {
         return
       }
 
-      const newListeners = input.listeners(logic)
+      const fakeLogic = {
+        ...logic,
+        actions: {}
+      }
+
+      Object.keys(logic.actions).forEach(key => {
+        fakeLogic.actions[key] = (...inp) => {
+          return getContext().store.dispatch(logic.actions[key](...inp))
+        }
+        fakeLogic.actions[key].toString = () => logic.actions[key].toString()
+      })
+
+      const newListeners = input.listeners(fakeLogic)
       
       logic.listeners = { 
         ...(logic.listeners || {}), 
-      } 
+      }
 
       for (const key of Object.keys(newListeners)) {
         const newArray = Array.isArray(newListeners[key]) ? newListeners[key] : [newListeners[key]]
