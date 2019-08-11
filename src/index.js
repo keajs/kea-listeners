@@ -20,15 +20,27 @@ export default {
   }),
   
   buildSteps: { 
-    listeners (logic, input) { 
-      if (input.workers) {
-        logic.workers = { ...input.workers }
+    workers (logic, input) { 
+      if (!input.workers) {
+        return
       }
-      if (input.listeners) { 
-        logic.listeners = { 
-          ...(logic.listeners || {}), 
-          ...input.listeners(logic)
-        } 
+
+      const newWorkers = typeof input.workers === 'function' ? input.workers(logic) : input.workers
+      logic.workers = { 
+        ...(logic.workers || {}), 
+        ...newWorkers 
+      }
+    },
+
+    listeners (logic, input) { 
+      if (!input.listeners) { 
+        return
+      }
+
+      const newListeners = input.listeners(logic)
+      logic.listeners = { 
+        ...(logic.listeners || {}), 
+        ...newListeners
       } 
     } 
   },
@@ -46,7 +58,13 @@ export default {
         const listeners = byAction[action.type]
         if (listeners) { 
           for (const listener of Object.values(listeners)) { 
-            listener(action, store) 
+            if (Array.isArray(listener)) {
+              for (const innerListener of listener) { 
+                innerListener(action, store) 
+              }
+            } else {
+              listener(action, store) 
+            }
           } 
         }
         return response 

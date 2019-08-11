@@ -67,12 +67,11 @@ test('workers work', () => {
     listeners: ({ actions, workers }) => ({
       [actions.updateName]: workers.doUpdateName
     }),
-    workers: {
-      doUpdateName ({ name }) {
+    workers: ({ actions }) => ({
+      doUpdateName (action) {
         listenerRan = true
       }
-    }
-    
+    })    
   })
 
   firstLogic.mount()
@@ -81,6 +80,52 @@ test('workers work', () => {
   expect(firstLogic.selectors.name(store.getState())).toBe('derpy')
 
   expect(listenerRan).toBe(true)
+})
+
+test('many listeners for one action', () => {
+  const { store } = getContext()
+
+  let listenerRan1 = false
+  let listenerRan2 = false
+  let listenerRan3 = false
+
+  const firstLogic = kea({
+    path: () => ['scenes', 'listeners', 'workers'],
+    actions: () => ({
+      updateName: name => ({ name })
+    }),
+    reducers: ({ actions }) => ({
+      name: ['chirpy', PropTypes.string, {
+        [actions.updateName]: (state, payload) => payload.name
+      }]
+    }),
+    listeners: ({ actions, workers }) => ({
+      [actions.updateName]: [
+        workers.doUpdateName,
+        workers.otherWorker,
+        function () {
+          listenerRan3 = true
+        }
+      ]
+    }),
+    workers: ({ actions }) => ({
+      doUpdateName (action) {
+        listenerRan1 = true
+      },
+      otherWorker (action) {
+        listenerRan2 = true
+      }
+    })    
+  })
+
+  firstLogic.mount()
+
+  store.dispatch(firstLogic.actions.updateName('derpy'))
+  expect(firstLogic.selectors.name(store.getState())).toBe('derpy')
+
+  expect(listenerRan1).toBe(true)
+  expect(listenerRan2).toBe(true)
+  expect(listenerRan3).toBe(true)
 })
 
 test.skip('listeners can call listeners', () => {
