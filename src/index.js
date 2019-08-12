@@ -39,13 +39,19 @@ export default {
 
       const fakeLogic = {
         ...logic,
+        actionCreators: logic.actions,
         actions: {}
       }
 
-      Object.keys(logic.actions).forEach(key => {
-        fakeLogic.actions[key] = (...inp) => {
-          return getContext().store.dispatch(logic.actions[key](...inp))
+      Object.defineProperty(fakeLogic, 'store', {
+        get () {
+          return getContext().store
         }
+      })
+
+      Object.keys(logic.actions).forEach(key => {
+        const action = logic.actions[key]
+        fakeLogic.actions[key] = (...inp) => fakeLogic.store.dispatch(action(...inp))
         fakeLogic.actions[key].toString = () => logic.actions[key].toString()
       })
 
@@ -74,13 +80,12 @@ export default {
       resetListenersOnContext(context) 
     },
 
-    beforeReduxStore (options) { 
-      const { listeners: { byAction } } = getContext()
-      
+    beforeReduxStore (options) {       
       options.middleware.push(store => next => action => { 
         const response = next(action) 
+        const { listeners: { byAction } } = getContext()
         const listeners = byAction[action.type]
-        if (listeners) { 
+        if (listeners) {
           for (const listenerArray of Object.values(listeners)) { 
             for (const innerListener of listenerArray) { 
               innerListener(action, store) 

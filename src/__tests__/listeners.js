@@ -8,7 +8,7 @@ import listenersPlugin from '../index'
 beforeEach(() => {
   resetContext({
     plugins: [listenersPlugin],
-    createStore: {}
+    createStore: { middleware: [] }
   })
 })
 
@@ -29,7 +29,6 @@ test('listeners work', () => {
     }),
     listeners: ({ actions }) => ({
       [actions.updateName]: action => {
-        console.log('ran listeners')
         listenerRan = true
       }
     })
@@ -192,6 +191,45 @@ test('actions are bound', () => {
 
   firstLogic.mount()
   store.dispatch(firstLogic.actions.updateName('derpy'))
+
+  expect(listenerRan1).toBe(true)
+  expect(listenerRan2).toBe(true)
+})
+
+test('store exists', () => {
+  const { store } = getContext()
+
+  let listenerRan1 = false
+  let listenerRan2 = false
+
+  const firstLogic = kea({
+    path: () => ['scenes', 'listeners', 'workers2'],
+    actions: () => ({
+      updateName: name => ({ name }),
+      updateOtherName: name => ({ name })
+    }),
+    reducers: ({ actions }) => ({
+      name: ['john', {
+        [actions.updateName]: (_, payload) => payload.name,
+        [actions.updateOtherName]: (_, payload) => payload.name
+      }]
+    }),
+    listeners: ({ actions, actionCreators, selectors, store }) => ({
+      [actions.updateName]: () => {
+        store.dispatch(actionCreators.updateOtherName('mike'))
+        expect(selectors.name(store.getState())).toBe('mike')
+        listenerRan1 = true
+      },
+      [actions.updateOtherName]: () => {
+        listenerRan2 = true
+      }
+    })
+  })
+
+  firstLogic.mount()
+  store.dispatch(firstLogic.actions.updateName('henry'))
+
+  expect(firstLogic.selectors.name(store.getState())).toBe('mike')
 
   expect(listenerRan1).toBe(true)
   expect(listenerRan2).toBe(true)
