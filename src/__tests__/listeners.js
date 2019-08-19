@@ -234,3 +234,45 @@ test('store exists', () => {
   expect(listenerRan1).toBe(true)
   expect(listenerRan2).toBe(true)
 })
+
+test('actions and values', () => {
+  const { store } = getContext()
+
+  let listenerRan1 = false
+  let listenerRan2 = false
+
+  const firstLogic = kea({
+    path: () => ['scenes', 'listeners', 'workers2'],
+    actions: () => ({
+      updateName: name => ({ name }),
+      updateOtherName: name => ({ name })
+    }),
+    reducers: ({ actions }) => ({
+      name: ['john', {
+        [actions.updateName]: (_, payload) => payload.name,
+        [actions.updateOtherName]: (_, payload) => payload.name
+      }]
+    }),
+    listeners: ({ actions, values }) => ({
+      [actions.updateName]: action => {
+        expect(action.payload.name).toBe('henry')
+        expect(values.name).toBe('henry')
+        actions.updateOtherName('mike')
+        expect(values.name).toBe('mike')
+        listenerRan1 = true
+      },
+      [actions.updateOtherName]: () => {
+        listenerRan2 = true
+      }
+    })
+  })
+
+  firstLogic.mount()
+  store.dispatch(firstLogic.actions.updateName('henry'))
+
+  expect(firstLogic.values.name).toBe('mike')
+
+  expect(listenerRan1).toBe(true)
+  expect(listenerRan2).toBe(true)
+})
+

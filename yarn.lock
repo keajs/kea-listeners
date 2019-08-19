@@ -4531,10 +4531,10 @@ jsx-ast-utils@^2.1.0:
     array-includes "^3.0.3"
     object.assign "^4.1.0"
 
-kea@^1.0.0-rc.2:
-  version "1.0.0-rc.2"
-  resolved "https://registry.yarnpkg.com/kea/-/kea-1.0.0-rc.2.tgz#aa93a6af186d45588926b346851e5885d1e86dc3"
-  integrity sha512-4jlg8TWocw5pbnhifGBl1j1CDcyj7sGjABLpd1gEeiTM2EUswrorjQqvED28ElhiPXGbm3WB1z7xQLWNaLjUWQ==
+kea@^1.0.0-rc.3:
+  version "1.0.0-rc.3"
+  resolved "https://registry.yarnpkg.com/kea/-/kea-1.0.0-rc.3.tgz#0a093ccff650b39e883d194f59cb62d2e15d3d76"
+  integrity sha512-CJMf7ZnVoKjYMS41WvAojaYcrW8te5gd7rQeZQCBxNUJdiSNLRI81PJHbgp56tRxAaeaB+AdDdQDBg/0QJoc+w==
   dependencies:
     opencollective "^1.0.3"
 
