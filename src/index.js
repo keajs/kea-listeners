@@ -9,8 +9,6 @@ kea({
 })
 */
 
-// TODO: support multiple listeners for the same action on the same logic (e.g. with logic.extend())
-// TODO: autobind actions
 export default { 
   name: 'listeners',
   
@@ -55,6 +53,8 @@ export default {
         fakeLogic.actions[key].toString = () => logic.actions[key].toString()
       })
 
+      fakeLogic._breakpointCounter = {}
+
       const newListeners = input.listeners(fakeLogic)
       
       logic.listeners = { 
@@ -62,7 +62,30 @@ export default {
       }
 
       for (const key of Object.keys(newListeners)) {
-        const newArray = Array.isArray(newListeners[key]) ? newListeners[key] : [newListeners[key]]
+        let newArray = Array.isArray(newListeners[key]) ? newListeners[key] : [newListeners[key]]
+        newArray = newArray.map(l => {
+          return async function (action) {
+            const breakCounter = (fakeLogic._breakpointCounter[key] || 0) + 1
+            fakeLogic._breakpointCounter[key] = breakCounter
+            const breakpoint = async (ms) => {
+              if (typeof ms !== 'undefined') {
+                await new Promise(r => setTimeout(r, ms))
+              }
+              if (fakeLogic._breakpointCounter[key] !== breakCounter) {
+                throw new Error('breakpoint broke')
+              }
+            }
+            let response
+            try {
+              response = await l(action, breakpoint)
+            } catch (e) {
+              if (e.message !== 'breakpoint broke') {
+                throw e
+              }
+            }
+            return response
+          }
+        })
         if (logic.listeners[key]) {          
           logic.listeners[key] = [
             ...logic.listeners[key],
@@ -88,7 +111,7 @@ export default {
         if (listeners) {
           for (const listenerArray of Object.values(listeners)) { 
             for (const innerListener of listenerArray) { 
-              innerListener(action, store) 
+              innerListener(action)
             }
           } 
         }

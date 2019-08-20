@@ -5,6 +5,8 @@ import PropTypes from 'prop-types'
 
 import listenersPlugin from '../index'
 
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms))
+
 beforeEach(() => {
   resetContext({
     plugins: [listenersPlugin],
@@ -274,5 +276,64 @@ test('actions and values', () => {
 
   expect(listenerRan1).toBe(true)
   expect(listenerRan2).toBe(true)
+})
+
+test('breakpoints', async () => {
+  const { store } = getContext()
+
+  let listenerRan0 = 0
+  let listenerRan1 = 0
+  let listenerRan2 = 0
+
+  const firstLogic = kea({
+    actions: () => ({
+      setUsername: username => ({ username }),
+      setRepositories: repositories => ({ repositories })
+    }),
+    reducers: ({ actions }) => ({
+      username: ['keajs', {
+        [actions.setUsername]: (_, payload) => payload.username
+      }],
+      repositories: [[], {
+        [actions.setRepositories]: (_, payload) => payload.repositories
+      }],
+    }),
+    listeners: ({ actions, values }) => ({
+      [actions.setUsername]: async function (action, breakpoint) {
+        const { setRepositories, setFetchError } = actions
+        const { username } = action.payload
+
+        listenerRan0 += 1
+
+        await breakpoint(100) // debounce for 100ms
+
+        listenerRan1 += 1
+
+        // simulate response
+        await delay(50)
+        breakpoint()
+
+        setRepositories([1,2,3])
+
+        listenerRan2 += 1
+      }
+    })
+  })
+
+  firstLogic.mount()
+  store.dispatch(firstLogic.actions.setUsername(firstLogic.values.username))
+  store.dispatch(firstLogic.actions.setUsername(firstLogic.values.username))
+  store.dispatch(firstLogic.actions.setUsername(firstLogic.values.username))
+  store.dispatch(firstLogic.actions.setUsername(firstLogic.values.username))
+
+  expect(firstLogic.values.username).toBe('keajs')
+
+  await delay(500)
+
+  expect(listenerRan0).toBe(4)
+  expect(listenerRan1).toBe(1)
+  expect(listenerRan2).toBe(1)
+
+  expect(firstLogic.values.repositories.length).toBe(3)
 })
 
