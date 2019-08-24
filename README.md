@@ -39,49 +39,63 @@ kea({
   // ... 
 
   listeners: ({ actions, values, store, sharedListeners }) => ({
-    // kea action that calls another action
+    // action that conditionally calls another action
     [actions.openUrl]: ({ url }) => { 
-      actions.urlOpened(url)
+      // get the value from the reducer 'url'
+      const currentUrl = values.url
+
+      if (url !== currentUrl) {
+        actions.reallyOpenTheUrl(url)
+      }
     },
     
-    [LOCATION_CHANGE]: (payload) => {
+    // listen to any redux action type, not just ones defined in this logic
+    'LOCATION_CHANGE': (payload) => {
       // do something with the regular redux action
       console.log(payload)
-      store.dispatch({ type: 'REDUX_ACTION', payload: { redux: 'cool' } })
+      store.dispatch({ 
+        type: 'REDUX_ACTION', 
+        payload: { redux: 'cool' } 
+      })
     },
     
     // two listeners with one shared action
     [actions.anotherAction]: sharedListeners.sharedActionListener,
     [actions.yetAnotherAction]: sharedListeners.sharedActionListener,
     
+    // Debounce for 300ms before making an API call
+    // Break if this action was called again while we were sleeping
     [actions.debouncedFetchResults]: async ({ username }, breapoint) => {
-      // Debounce for 300ms
       // If the same action gets called again while this waits, we will throw an exception
-      // and catch it immediately, effectively cancellying the operation. 
+      // and catch it immediately, effectively cancelling the operation. 
       await breakpoint(300) 
 
       // Make an API call
       const user = await API.fetchUser(username)
 
-      // if during the previous fetch this action was called again, then cancel saving the result
+      // if during the previous fetch this action was called again, then break here
       breakpoint()
 
       // save the result
       actions.userReceived(user)
     },
+
+    // you can also pass an array of functions
     [actions.oneActionMultipleListeners]: [
-      (payload) => { /* ... */ },
-      sharedListeners.doSomething
+      (payload, breakpoint, action) => { /* ... */ },
+      sharedListeners.doSomething,
+      sharedListeners.logAction
     ]
   }),
 
-  sharedListeners: () => ({
+  // if multiple actions must trigger similar code, use sharedListeners
+  sharedListeners: ({ actions, values, store }) => ({
     // all listeners and sharedListeners also get a third parameter:
     // - action = the full dispatched action
     sharedActionListener: function (payload, breakpoint, action) {
       if (action.type === actions.anotherAction.toString()) {
-        // handle first
-      } 
+        // handle this case separately
+      }
       // do something common for both
       console.log(action)
     }
