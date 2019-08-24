@@ -84,8 +84,6 @@ test('sharedListeners work', () => {
 })
 
 test('many listeners for one action', () => {
-  const { store } = getContext()
-
   let listenerRan1 = false
   let listenerRan2 = false
   let listenerRan3 = false
@@ -169,8 +167,6 @@ test('extend works', () => {
 })
 
 test('actions are bound', () => {
-  const { store } = getContext()
-
   let listenerRan1 = false
   let listenerRan2 = false
 
@@ -242,8 +238,6 @@ test('store exists', () => {
 })
 
 test('actions and values', () => {
-  const { store } = getContext()
-
   let listenerRan1 = false
   let listenerRan2 = false
 
@@ -290,8 +284,6 @@ test('actions and values', () => {
 })
 
 test('breakpoints', async () => {
-  const { store } = getContext()
-
   let listenerRan0 = 0
   let listenerRan1 = 0
   let listenerRan2 = 0
