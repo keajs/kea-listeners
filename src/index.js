@@ -26,10 +26,11 @@ export default {
         return
       }
 
-      const newWorkers = typeof input.sharedListeners === 'function' ? input.sharedListeners(logic) : input.sharedListeners
+      const newSharedListeners = typeof input.sharedListeners === 'function' ? input.sharedListeners(logic) : input.sharedListeners
+
       logic.sharedListeners = {
         ...(logic.sharedListeners || {}),
-        ...newWorkers
+        ...newSharedListeners
       }
     },
 
