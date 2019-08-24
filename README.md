@@ -4,7 +4,7 @@
 [![Backers on Open Collective](https://opencollective.com/kea/backers/badge.svg)](#backers)
 [![Sponsors on Open Collective](https://opencollective.com/kea/sponsors/badge.svg)](#sponsors)
 
-# kea=listeners
+# kea-listeners
 
 Listners plugin for kea. Works with kea `1.0.0-rc.4` and up.
 
