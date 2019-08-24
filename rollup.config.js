@@ -5,7 +5,7 @@ export default [
   {
     input: './src/index.js',
     output: { file: 'lib/index.js', format: 'cjs' },
-    external: ['prop-types', 'react', 'redux', 'react-redux', 'reselect'],
+    external: ['prop-types', 'react', 'redux', 'react-redux', 'reselect', 'kea'],
     plugins: [babel(), resolve()]
   }
 ]
