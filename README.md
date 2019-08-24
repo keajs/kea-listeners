@@ -8,7 +8,7 @@
 
 Listners plugin for kea. Works with kea `1.0.0-rc.4` and up.
 
-## what and why?
+## What and why?
 
 Listeners are functions that run after an action is dispatched.
 
