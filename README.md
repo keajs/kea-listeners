@@ -8,6 +8,24 @@ Listners plugin for kea. Works with kea 1.0-rc.4 and up.
 
 Listeners are functions that run after an action is dispatched.
 
+Getting started:
+
+Add the package:
+
+```sh
+yarn add kea-listeners
+```
+
+... then add it to kea's plugins list:
+
+```js
+import listeners from 'kea-listener'
+
+resetContext({
+  plugins: [listeners]
+})
+```
+
 Sample usage:
 
 ```js
