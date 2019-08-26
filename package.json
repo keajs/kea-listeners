@@ -1,6 +1,6 @@
 {
   "name": "kea-listeners",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Action Listener side-effects for Kea",
   "author": "Marius Andra",
   "license": "MIT",
@@ -87,5 +87,5 @@
     "rollup": "^1.10.1",
     "rollup-plugin-babel": "^4.0.1",
     "rollup-plugin-node-resolve": "^4.2.3"
-   }
+  }
 }
