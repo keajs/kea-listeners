@@ -20,20 +20,12 @@ export default {
     sharedListeners: undefined
   }),
 
+  buildOrder: {
+    listeners: { before: 'events' },
+    sharedListeners: { before: 'listeners' }
+  },
+
   buildSteps: {
-    sharedListeners (logic, input) {
-      if (!input.sharedListeners) {
-        return
-      }
-
-      const newSharedListeners = typeof input.sharedListeners === 'function' ? input.sharedListeners(logic) : input.sharedListeners
-
-      logic.sharedListeners = {
-        ...(logic.sharedListeners || {}),
-        ...newSharedListeners
-      }
-    },
-
     listeners (logic, input) {
       if (!input.listeners) {
         return
@@ -89,6 +81,19 @@ export default {
         } else {
           logic.listeners[key] = newArray
         }
+      }
+    },
+
+    sharedListeners (logic, input) {
+      if (!input.sharedListeners) {
+        return
+      }
+
+      const newSharedListeners = typeof input.sharedListeners === 'function' ? input.sharedListeners(logic) : input.sharedListeners
+
+      logic.sharedListeners = {
+        ...(logic.sharedListeners || {}),
+        ...newSharedListeners
       }
     }
   },
