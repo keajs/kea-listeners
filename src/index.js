@@ -1,4 +1,4 @@
-import { getContext } from 'kea'
+import { getContext, setPluginContext, getPluginContext } from 'kea'
 
 /* usage:
 kea({
@@ -67,14 +67,14 @@ export default {
                 await new Promise(resolve => setTimeout(resolve, ms))
               }
               if (fakeLogic._listenerBreakpointCounter[key] !== breakCounter) {
-                throw new Error('breakpoint broke')
+                throw new Error('kea-listeners breakpoint broke')
               }
             }
             let response
             try {
               response = await l(action.payload, breakpoint, action)
             } catch (e) {
-              if (e.message !== 'breakpoint broke') {
+              if (e.message !== 'kea-listeners breakpoint broke') {
                 throw e
               }
             }
@@ -94,14 +94,14 @@ export default {
   },
 
   events: {
-    afterOpenContext (context) {
-      resetListenersOnContext(context)
+    afterPlugin () {
+      setPluginContext('listeners', { byAction: {}, byPath: {} })
     },
 
     beforeReduxStore (options) {
       options.middleware.push(store => next => action => {
         const response = next(action)
-        const { listeners: { byAction } } = getContext()
+        const { byAction } = getPluginContext('listeners')
         const listeners = byAction[action.type]
         if (listeners) {
           for (const listenerArray of Object.values(listeners)) {
@@ -114,32 +114,28 @@ export default {
       })
     },
 
-    afterMount (pathString, logic) {
+    afterMount (logic) {
       if (!logic.listeners) {
         return
       }
-      addListenersByPathString(pathString, logic.listeners)
+      addListenersByPathString(logic.pathString, logic.listeners)
     },
 
-    afterUnmount (pathString, logic) {
+    afterUnmount (logic) {
       if (!logic.listeners) {
         return
       }
-      removeListenersByPathString(pathString, logic.listeners)
+      removeListenersByPathString(logic.pathString, logic.listeners)
     },
 
-    beforeCloseContext (context) {
-      resetListenersOnContext(context)
+    beforeCloseContext () {
+      setPluginContext('listeners', { byAction: {}, byPath: {} })
     }
   }
 }
 
-function resetListenersOnContext (context) {
-  context.listeners = { byAction: {}, byPath: {} }
-}
-
 function addListenersByPathString (pathString, listeners) {
-  const { listeners: { byPath, byAction } } = getContext()
+  const { byPath, byAction } = getPluginContext('listeners')
 
   byPath[pathString] = listeners
 
@@ -152,7 +148,7 @@ function addListenersByPathString (pathString, listeners) {
 }
 
 function removeListenersByPathString (pathString, listeners) {
-  const { listeners: { byPath, byAction } } = getContext()
+  const { byPath, byAction } = getPluginContext('listeners')
 
   Object.entries(listeners).forEach(([action, listener]) => {
     delete byAction[action][pathString]
