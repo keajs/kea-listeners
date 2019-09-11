@@ -31,9 +31,10 @@ export default {
         return
       }
 
+      logic.cache.listenerBreakpointCounter = {}
+
       const fakeLogic = {
-        ...logic,
-        _listenerBreakpointCounter: {}
+        ...logic
       }
 
       Object.defineProperty(fakeLogic, 'store', {
@@ -52,16 +53,24 @@ export default {
         let newArray = Array.isArray(newListeners[key]) ? newListeners[key] : [newListeners[key]]
         newArray = newArray.map(l => {
           return async function (action) {
-            const breakCounter = (fakeLogic._listenerBreakpointCounter[key] || 0) + 1
-            fakeLogic._listenerBreakpointCounter[key] = breakCounter
-            const breakpoint = async (ms) => {
-              if (typeof ms !== 'undefined') {
-                await new Promise(resolve => setTimeout(resolve, ms))
-              }
-              if (fakeLogic._listenerBreakpointCounter[key] !== breakCounter) {
+            const breakCounter = (fakeLogic.cache.listenerBreakpointCounter[key] || 0) + 1
+            fakeLogic.cache.listenerBreakpointCounter[key] = breakCounter
+
+            const throwIfCalled = () => {
+              if (fakeLogic.cache.listenerBreakpointCounter[key] !== breakCounter) {
                 throw new Error('kea-listeners breakpoint broke')
               }
             }
+            const breakpoint = (ms) => {
+              if (typeof ms !== 'undefined') {
+                return new Promise(resolve => setTimeout(resolve, ms)).then(() => {
+                  throwIfCalled()
+                })
+              } else {
+                throwIfCalled()
+              }
+            }
+
             let response
             try {
               response = await l(action.payload, breakpoint, action)
@@ -126,7 +135,7 @@ export default {
       addListenersByPathString(logic.pathString, logic.listeners)
     },
 
-    afterUnmount (logic) {
+    beforeUnmount (logic) {
       if (!logic.listeners) {
         return
       }

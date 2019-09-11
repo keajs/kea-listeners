@@ -8,12 +8,12 @@
   "esnext": "src/index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/keajs/kea.git"
+    "url": "git+https://github.com/keajs/kea-listeners.git"
   },
   "bugs": {
-    "url": "https://github.com/keajs/kea/issues"
+    "url": "https://github.com/keajs/kea-listeners/issues"
   },
-  "homepage": "https://github.com/keajs/kea#readme",
+  "homepage": "https://github.com/keajs/kea-listeners#readme",
   "scripts": {
     "build": "rollup -c",
     "watch": "rollup -cw",
@@ -76,7 +76,7 @@
     "jest": "^24.7.1",
     "jest-environment-node-debug": "^2.0.0",
     "jsdom": "^15.0.0",
-    "kea": "^1.0.0-rc.8",
+    "kea": "^1.0.0-rc.10.2",
     "prop-types": "^15.7.2",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",

@@ -312,7 +312,7 @@ test('breakpoints', async () => {
         listenerRan1 += 1
 
         // simulate response
-        await delay(50)
+        await delay(200)
         breakpoint()
 
         setRepositories([1, 2, 3])
@@ -326,6 +326,7 @@ test('breakpoints', async () => {
   expect(firstLogic.values.repositories.length).toBe(0)
   expect(firstLogic.values.username).toBe('keajs')
 
+  // these should trigger the "await breakpoint()"
   firstLogic.actions.setUsername('user1')
   firstLogic.actions.setUsername('user2')
   firstLogic.actions.setUsername('user3')
@@ -340,4 +341,15 @@ test('breakpoints', async () => {
   expect(listenerRan2).toBe(1)
 
   expect(firstLogic.values.repositories.length).toBe(3)
+
+  // this should trigger the breakpoint without await
+  firstLogic.actions.setUsername('user1')
+  await delay(200)
+  firstLogic.actions.setUsername('user2')
+  await delay(200)
+  firstLogic.actions.setUsername('user3')
+
+  expect(listenerRan0).toBe(7)
+  expect(listenerRan1).toBe(3)
+  expect(listenerRan2).toBe(1)
 })
