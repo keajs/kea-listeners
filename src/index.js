@@ -6,7 +6,7 @@ kea({
     [actions.openUrl]: ({ url }, breakpoint, action) => { actions.urlOpened(url) },
     [LOCATION_CHANGE]: [
       (payload, breakpoint, action) => { store.dispatch(...) },
-      sharedListenres.otherListeForTheSameAction
+      sharedListeners.otherListeForTheSameAction
     ]
   })
 })
@@ -98,7 +98,17 @@ export default {
         return
       }
 
-      const newSharedListeners = typeof input.sharedListeners === 'function' ? input.sharedListeners(logic) : input.sharedListeners
+      const fakeLogic = {
+        ...logic
+      }
+
+      Object.defineProperty(fakeLogic, 'store', {
+        get () {
+          return getContext().store
+        }
+      })
+
+      const newSharedListeners = typeof input.sharedListeners === 'function' ? input.sharedListeners(fakeLogic) : input.sharedListeners
 
       logic.sharedListeners = {
         ...(logic.sharedListeners || {}),
