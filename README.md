@@ -1,4 +1,4 @@
-![NPM Version](https://img.shields.io/npm/v/kea-listeners.svg)
+[![NPM Version](https://img.shields.io/npm/v/kea-listeners.svg)](https://www.npmjs.com/package/kea-listeners)
 [![minified](https://badgen.net/bundlephobia/min/kea-listeners)](https://bundlephobia.com/result?p=kea-listeners)
 [![minified + gzipped](https://badgen.net/bundlephobia/minzip/kea-listeners)](https://bundlephobia.com/result?p=kea-listeners)
 [![Backers on Open Collective](https://opencollective.com/kea/backers/badge.svg)](#backers)
